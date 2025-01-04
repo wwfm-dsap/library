@@ -1,0 +1,51 @@
+[
+  {
+    "name": "<div class='title-line title-disable'><div class='icon f-datro'></div>Earnings (2025)</div>",
+    "path": "javascript:void(0)",
+    "_links": {
+      "html": "javascript:void(0)"
+    }
+   },
+  {
+    "name": "<div class='subtitle-line-mini subtitle-mini-disable'><div class='icon i-handshake'></div>Q1 (Apr 06 - Jun 30)</div>",
+    "path": "javascript:void(0)",
+    "_links": {
+      "html": "javascript:void(0)"
+    }
+   },
+  {
+    "name": "<div class='subtitle-line enable-link'>Earnings Release</div>",
+    "path": "./2025-q1_earnings-release/index.html",
+    "_links": {
+      "html": "./2025-q1_earnings-release/index.html"
+    }
+   },
+  {
+    "name": "<div class='subtitle-line enable-link'>Webcast & Transcript</div>",
+    "path": "./2025-q1_webcast-transcript/index.html",
+    "_links": {
+      "html": "./2025-q1_webcast-transcript/index.html"
+    }
+   },
+{
+    "name": "<div class='title-line title-disable'><div class='icon f-datro'></div>Income Accounts</div>",
+    "path": "javascript:void(0)",
+    "_links": {
+      "html": "javascript:void(0)"
+    }
+   },
+{
+    "name": "<div class='title-line title-disable'><div class='icon f-datro'></div>Expense Accounts</div>",
+    "path": "javascript:void(0)",
+    "_links": {
+      "html": "javascript:void(0)"
+    }
+   },
+  {
+    "name": "<div class='page-scroll-fix title-disable'></div>",
+    "path": "javascript:void(0)",
+    "_links": {
+      "html": "javascript:void(0)"
+    }
+   }
+]

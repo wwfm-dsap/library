@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WWFM-DSAP Public Records</title>
+    <style>
+        @import "https://assets.codepen.io/3351103/__reset.css";
+
+        :root {
+            --bg-color: #111;
+            --text-color: #f8f8f8;
+            --accent-color: #f68a1e;
+            --border-color: #222;
+            --font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h2 {
+            font-size: 2.5em;
+            margin: 20px 20px 15px 20px;
+            color: #f0f0f0;
+        }
+
+        h4 {
+            font-size: 1.2em;
+            margin: 0 20px 20px 20px;
+            color: #e5e5e5;
+        }
+
+
+        h5 {
+            font-weight: lighter;
+            margin: 0 20px 20px 20px;
+            color: #e5e5e5;
+        }
+
+        #accordion {
+            width: 100%;
+            flex-grow: 1;
+            overflow-y: auto;
+            background: #1a1a1a;
+            border: 1px solid var(--border-color);
+            border-radius: 0;
+            text-transform: uppercase;
+        }
+
+        .accordion, .sub-accordion {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s, padding-left 0.3s;
+            width: 100%;
+            display: block;
+            border-bottom: 1px solid var(--border-color);
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #f8f8f8;
+        }
+
+        label.sub-accordion.lvl-5 > .caret {
+            opacity: 0.3;
+            margin-left: 2px;
+            color: red;
+            background: red;
+            border-radius: 2px;
+            list-style-type: decimal !important;
+            display: inline-block;
+            border-color: grey;
+            min-width: 11px ! Important;
+        }
+
+        .accordion:hover, .sub-accordion:hover {
+            background-color: #282828;
+        }
+
+        .country-item {
+            font-weight: normal;
+            color: #f0f0f0;
+        }
+
+        .sub-accordion.lvl-1 {
+            padding-left: 20px;
+            color: #e8e8e8;
+        }
+
+        .sub-accordion.lvl-2 {
+            padding-left: 30px;
+            color: #d8d8d8;
+        }
+
+        .sub-accordion.lvl-3 {
+            padding-left: 40px;
+            color: #c8c8c8;
+        }
+
+        .sub-accordion.lvl-4 {
+            padding-left: 60px;
+            color: #b8b8b8;
+        }
+
+        .sub-accordion.lvl-5 {
+            padding-left: 80px;
+            color: #b8b8b8;
+        }
+
+        .dropdown-menu {
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            max-height: 0;
+            background-color: #1a1a1a;
+        }
+
+        .dropdown-menu.open {
+            max-height: 1000px;
+            margin-left: 10px;
+        }
+
+        .uid {
+            font-size: 0.8em;
+            vertical-align: middle;
+            margin-left: 5px;
+            color: #a0a0a0;
+        }
+
+        .caret {
+            display: inline-block;
+            width: 0;
+            height: 0;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+            border-left: 6px solid var(--text-color);
+            margin-right: 10px;
+            transition: transform 0.3s ease-out;
+        }
+
+        .open > .caret {
+            transform: rotate(90deg);
+        }
+
+        /* Styles for the popup iframe */
+        #popupIframe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #popupIframe iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Styles for the close button */
+        .close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 255, 255, 0.4);
+    width: 5vw;
+    height: 5vw;
+    font-size: -webkit-xxx-large;
+    display: flex
+;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1001;
+    color: rgba(255, 255, 255, 0.4);
+    border: 1px solid black;
+    border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<h2>WWFM-DSAP Public Records</h2>
+<h4>Select your target country or administrative division level</h4>
+<h5>Select the regions name to see further options or the regions license ID to view its public records</h5>
+<h5>See the <a href="#" id="showHeatmap">Analytics</a> for a clearer view of the completion status of the library</h5>
+<br>
+<nav id="accordion">
+    <div id="accordionContainer"></div>
+</nav>
+
+<!-- Popup iframe and close button -->
+<div id="popupIframe">
+    <button class="close-btn" onclick="closePopup()">×</button>
+    <iframe src="heatmap.html"></iframe>
+</div>
+
+<script>
+function createAccordion(data, container, level = 0, parentId = "", countryCode = "000") {
+    if (!data) {
+        console.error("No data provided for accordion level", level);
+        return;
+    }
+
+    container.innerHTML = "";
+
+    for (let [index, item] of data.entries()) {
+        const uniqueId = `${parentId}-${level}-${index}`;
+        let uid = item.uid || formatUID(item.uid, level, countryCode);
+
+        let label = document.createElement("label");
+        label.className = level === 0 ? "accordion country-item" : `sub-accordion lvl-${level + 1}`;
+        label.innerHTML = `<span class="caret"></span> ${item.name} <a class="uid" href="/en/${uid}/" onclick="event.stopPropagation();">${uid}</a>`;
+        label.addEventListener("click", function(e) {
+            e.preventDefault();
+            const dropdown = this.nextElementSibling;
+            dropdown.classList.toggle("open");
+            // Toggle caret rotation
+            this.querySelector('.caret').classList.toggle('open');
+        });
+        container.appendChild(label);
+
+        let dropdown = document.createElement("div");
+        dropdown.className = "dropdown-menu";
+
+        const nextLevelKey = `level${level + 2}`;
+        if (item[nextLevelKey]) {
+            createAccordion(item[nextLevelKey], dropdown, level + 1, uniqueId, countryCode);
+        }
+
+        container.appendChild(dropdown);
+    }
+}
+
+function formatUID(uid, level, countryCode) {
+    if (!uid) {
+        if (level === 0) { // For countries, we use the country code provided
+            return `${countryCode}-0000-00000-000000-0000000-00000000`;
+        }
+        // For other levels, we keep the country code but set rest to zero
+        return `${countryCode}-0000-00000-000000-0000000-00000000`.split('-').map((part, i) => 
+            i === 0 ? part : '0'.repeat(part.length)).join('-');
+    }
+    return uid;
+}
+
+// Fetch data and create accordion for countries
+fetch('data.json')
+    .then(response => response.json())
+    .then(data => {
+        let container = document.getElementById("accordionContainer");
+        if (data && data.countries && data.countries.length > 0) {
+            data.countries.forEach((country, index) => {
+                let countryLabel = document.createElement("label");
+                countryLabel.className = "accordion country-item";
+
+                let countryCode = '000'; // Default if no child data is available
+                fetch(country.filename)
+                    .then(response => response.json())
+                    .then(countryData => {
+                        if(countryData.level1 && countryData.level1.length > 0) {
+                            countryCode = countryData.level1[0].uid.split('-')[0] || '000';
+                        }
+                        // Create the country label with UID as hyperlink
+                        let formattedCountryUid = formatUID(country.country_uid, 0, countryCode);
+                        countryLabel.innerHTML = `<span class="caret"></span> ${country.name} <a class="uid" href="/en/${formattedCountryUid}/" onclick="event.stopPropagation();">${formattedCountryUid}</a>`;
+                        container.appendChild(countryLabel);
+
+                        let countryDropdown = document.createElement("div");
+                        countryDropdown.className = "dropdown-menu";
+
+                        countryLabel.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            if (this.nextElementSibling.classList.contains('open')) {
+                                this.nextElementSibling.classList.remove('open');
+                                this.querySelector('.caret').classList.remove('open');
+                            } else {
+                                this.nextElementSibling.classList.add('open');
+                                this.querySelector('.caret').classList.add('open');
+                                if (!this.nextElementSibling.innerHTML) {
+                                    fetch(country.filename)
+                                        .then(response => response.json())
+                                        .then(countryData => {
+                                            createAccordion(countryData.level1, this.nextElementSibling, 0, index, countryCode);
+                                            this.nextElementSibling.scrollIntoView({behavior: "smooth", block: "end"});
+                                        })
+                                        .catch(error => {
+                                            console.error('Error fetching country data:', error);
+                                            this.nextElementSibling.innerHTML = 'Error loading data';
+                                        });
+                                }
+                            }
+                        });
+
+                        container.appendChild(countryDropdown);
+                    })
+                    .catch(error => console.error('Error fetching child data for UID:', error));
+            });
+        } else {
+            container.innerHTML = 'No administrative data found.';
+        }
+    })
+    .catch(error => {
+        console.error('There was a problem with the fetch operation:', error.message);
+        document.getElementById("accordionContainer").innerHTML = 'Error loading administrative divisions.';
+    });
+
+// Show the heatmap iframe popup
+document.getElementById('showHeatmap').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('popupIframe').style.display = 'flex';
+});
+
+// Close the heatmap iframe popup
+function closePopup() {
+    document.getElementById('popupIframe').style.display = 'none';
+}
+</script>
+
+</body>
+</html>
