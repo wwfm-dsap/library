@@ -9,6 +9,7 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [library.10] - Q1/2025
 
 ### Changed
+Jan-04 - 2nd stab at permissions  
 Jan 04 - Fixed permissions  
 Jan-04 - Improved heatmap with ledger and label on mouseover/ touch  
 Jan-04 - Added heatmap into index.html (as popup). fixed sample target directory not loading on remote server (alliance/finances/index.html contained _treeview.json not ./_treeview.json - we'll see!    
