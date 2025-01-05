@@ -9,6 +9,8 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [library.10] - Q1/2025
 
 ### Changed
+Jan-05 - all regions folders are in the root (can't hide them with a dot with Netlify, which is a shame). so 'en` is removed    
+Jan-05 - Added README.md , changed script 3.sh and heatmap.html (now status.html) to make and use `regions` not `en` filepath  
 Jan 04 - Fixed permissions  
 Jan-04 - Improved heatmap with ledger and label on mouseover/ touch  
 Jan-04 - Added heatmap into index.html (as popup). fixed sample target directory not loading on remote server (alliance/finances/index.html contained _treeview.json not ./_treeview.json - we'll see!    
