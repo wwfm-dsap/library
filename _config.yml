@@ -1,0 +1,5 @@
+url: https://test-001.wwfm-dsap.com
+enforce_ssl: test-001.wwfm-dsap.com
+theme: jekyll-theme-cayman
+permalink: pretty
+permalink: /static/library/index.html
