@@ -73,16 +73,21 @@
             border: 1px solid white;
         }
 
-        .tooltip {
-            position: absolute;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 5px;
-            border-radius: 5px;
-            font-size: 0.8em;
-            visibility: hidden;
-            z-index: 101;
-        }
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 0.8em;
+    z-index: 101;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out;
+    opacity: 0;
+    max-width: 200px; /* Ensure the tooltip doesn't get too wide */
+    white-space: normal; /* Allow wrapping */
+}
+
 
         .heatmap_cell:hover .tooltip,
         .heatmap_cell:focus .tooltip {

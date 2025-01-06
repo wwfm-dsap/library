@@ -9,14 +9,15 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [library.10] - Q1/2025
 
 ### Changed
-Jan-05 - minor bug fixes. And there's an issue with github hosting so many files. Maybe need to use a json to simulate dynamic db  
-Jan-05 - all regions folders are in the root (can't hide them with a dot with Netlify, which is a shame). so 'en` is removed    
+Jan-05 - Made Tooltip stop going off screen  
+Jan-05 - Minor bug fixes. And there's an issue with github hosting so many files. Maybe need to use a json to simulate dynamic db  
+Jan-05 - All regions folders are in the root (can't hide them with a dot with Netlify, which is a shame). so 'en` is removed    
 Jan-05 - Added README.md , changed script 3.sh and heatmap.html (now status.html) to make and use `regions` not `en` filepath  
 Jan 04 - Fixed permissions  
 Jan-04 - Improved heatmap with ledger and label on mouseover/ touch  
 Jan-04 - Added heatmap into index.html (as popup). fixed sample target directory not loading on remote server (alliance/finances/index.html contained _treeview.json not ./_treeview.json - we'll see!    
-Jan-04 - hyperlinks work - starting billing/account profiles next. Will add regions as they commit payment   
-Jan-04 - hyperlinks work, but locally the webapp has to be in the top level website root directory (bug is url)   
+Jan-04 - Hyperlinks work - starting billing/account profiles next. Will add regions as they commit payment   
+Jan-04 - Hyperlinks work, but locally the webapp has to be in the top level website root directory (bug is url)   
 Jan-03 - UID's now hyperlink  - next I'm trying to have the filepaths built, based on the jsons UID   
 Jan-03 - Sample Menu and Data Complete. Next to add hyperlinks and sample docs/ account profiles  
 Jan-03 - Some changes to the data. UK upto level 3 is complete, US Alabama state level 2 complete too   

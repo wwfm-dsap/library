@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, initial-scale=1, maximum-scale=1">
+    <title>Responsive Heatmap</title>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no" name="viewport">
+        <link href="_theme-explorer/favicons/apple-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+        <link href="_theme-explorer/favicons/apple-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+        <link href="_theme-explorer/favicons/apple-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+        <link href="_theme-explorer/favicons/apple-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+        <link href="_theme-explorer/favicons/apple-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+        <link href="_theme-explorer/favicons/apple-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+        <link href="_theme-explorer/favicons/apple-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+        <link href="_theme-explorer/favicons/apple-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+        <link href="_theme-explorer/favicons/apple-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+        <link href="_theme-explorer/favicons/android-icon-192x192.png" rel="icon" sizes="192x192" type="image/png">
+        <link href="_theme-explorer/favicons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+        <link href="_theme-explorer/favicons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+        <link href="_theme-explorer/favicons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+        <link rel="manifest" href="manifest.json">
+        <meta content="_theme-explorer/favicons/ms-icon-144x144.png" name="msapplication-TileImage">
+        <link rel="stylesheet" href="style.css">
+<style>
+html {
+  overflow-y:   scroll;
+  overflow-x:   hidden;
+}
+::-webkit-scrollbar {
+  width: 0px;
+  background: transparent; /* make scrollbar transparent */
+}
+</style>
+</head>
+<body>
+    <div class="key">
+        <p><span style="color: orange;">■</span> Negotiating</p>
+        <p><span style="color: green;">■</span> Licensed</p>
+    </div>
+    <div class="container">
+        <div class="heatmap" id="heatmap1"></div>
+        <div class="heatmap" id="heatmap2"></div>
+        <div class="heatmap" id="heatmap3"></div>
+    </div>
+<script>
+    async function fetchData() {
+        try {
+            const response = await fetch('data.json');
+            const data = await response.json();
+            return data.countries;
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            return null;
+        }
+    }
+
+    async function fetchCountryData(filename) {
+        try {
+            const response = await fetch(filename);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error(`Error fetching data from ${filename}:`, error);
+            return null;
+        }
+    }
+
+    async function fetchIndex() {
+        try {
+            const response = await fetch('index.csv');
+            const text = await response.text();
+            const lines = text.split('\n').filter(Boolean); // Remove empty lines
+            return lines.map(line => {
+                const [code, name] = line.split(',').map(item => item.replace(/"/g, '').trim());
+                return { code: code.toLowerCase(), name };
+            });
+        } catch (error) {
+            console.error('Error fetching index.csv:', error);
+            return [];
+        }
+    }
+
+    function extractUIDs(data) {
+        const uids = [];
+
+        function recurse(obj) {
+            if (obj.uid) {
+                uids.push(obj.uid);
+            }
+            for (const key in obj) {
+                if (typeof obj[key] === 'object') {
+                    recurse(obj[key]);
+                }
+            }
+        }
+
+        recurse(data);
+        return uids;
+    }
+
+    function countUIDs(uids) {
+        const counts = new Map();
+
+        for (const uid of uids) {
+            const parts = uid.split('-');
+
+            for (let i = 1; i <= parts.length; i++) {
+                const prefix = parts.slice(0, i).join('-');
+                counts.set(prefix, (counts.get(prefix) || 0) + 1);
+            }
+        }
+
+        return counts;
+    }
+
+    function getCellColor(count) {
+        if (count >= 10) {
+            return 'light-green';
+        } else if (count > 0) {
+            return 'dark-green';
+        } else {
+            return 'dark-red';
+        }
+    }
+
+    function adjustTooltipPosition(tooltip) {
+        const rect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+
+        // Adjust horizontally if the tooltip overflows
+        if (rect.right > viewportWidth) {
+            tooltip.style.left = `${viewportWidth - rect.width - 10}px`; // Shift left
+        } else if (rect.left < 0) {
+            tooltip.style.left = `10px`; // Shift right
+        }
+
+        // Adjust vertically if the tooltip overflows
+        if (rect.bottom > viewportHeight) {
+            tooltip.style.top = `${viewportHeight - rect.height - 10}px`; // Shift up
+        } else if (rect.top < 0) {
+            tooltip.style.top = `10px`; // Shift down
+        }
+    }
+
+    function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatmapId) {
+        const heatmap = document.getElementById(heatmapId);
+
+        for (let row = 0; row < 6; row++) {
+            for (let col = 0; col < 68; col++) {
+                const originalCol = (heatmapId === 'heatmap1' ? col : (heatmapId === 'heatmap2' ? col + 68 : col + 136));
+                const prefix = `${String(originalCol).padStart(3, '0')}-${String(row).padStart(4, '0')}`;
+                const count = counts.get(prefix) || 0;
+                const cellColor = getCellColor(count);
+
+                const cell = document.createElement('div');
+                cell.className = `heatmap_cell ${cellColor}`;
+
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                const country = countryIndex[originalCol];
+                const countryCode = country ? country.code : null;
+                const countryName = country ? `(${countryCode.toUpperCase()}) ${country.name}` : `Country no.: ${originalCol + 1}`;
+                const divisionLevel = `Level ${row}`;
+                const uidFormat = `${prefix}-00000-000000-0000000-00000000`;
+
+                if (existingUIDs.includes(uidFormat)) {
+                    tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><a href="${uidFormat}" target="_self" style="color: white;">View records</a>`;
+                } else {
+                    tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><span style="color: grey;">View records</span>`;
+                }
+
+                tooltip.style.position = 'absolute';
+                tooltip.style.visibility = 'hidden';
+                tooltip.style.opacity = 0;
+                tooltip.style.transition = 'opacity 0.2s ease-in-out';
+
+                // Show and adjust tooltip on hover
+                cell.addEventListener('mouseenter', () => {
+                    tooltip.style.visibility = 'visible';
+                    tooltip.style.opacity = 1;
+
+                    // Adjust tooltip position to prevent overflow
+                    adjustTooltipPosition(tooltip);
+                });
+
+                // Hide tooltip on mouse leave
+                cell.addEventListener('mouseleave', () => {
+                    tooltip.style.visibility = 'hidden';
+                    tooltip.style.opacity = 0;
+                });
+
+                cell.appendChild(tooltip);
+                heatmap.appendChild(cell);
+
+                // Add flags to the first row
+                if (row === 0 && countryCode) {
+                    cell.style.backgroundImage = `url('_theme-explorer/flag/${countryCode}.png')`;
+                }
+            }
+        }
+    }
+
+    async function init() {
+        const [countryData, countryIndex] = await Promise.all([fetchData(), fetchIndex()]);
+
+        if (!countryData || !countryIndex.length) {
+            return;
+        }
+
+        let allUIDs = [];
+        let divisionNames = ["Level 0", "Level 1", "Level 2", "Level 3", "Level 4", "Level 5"];
+
+        for (const [index, country] of countryData.entries()) {
+            const data = await fetchCountryData(country.filename);
+
+            if (data) {
+                const uids = extractUIDs(data);
+                allUIDs = allUIDs.concat(uids);
+            }
+        }
+
+        const counts = countUIDs(allUIDs);
+        createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap1');
+        createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap2');
+        createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap3');
+
+        // Allow scrolling only after initialization
+        document.documentElement.style.overflow = 'hidden';
+    }
+
+    init();
+</script>
+
+</body>
+</html>
