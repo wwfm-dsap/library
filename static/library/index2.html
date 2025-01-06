@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Heatmap</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden; /* Prevent scrolling */
+            display: flex;
+            flex-direction: column;
+            background-color: #111;
+        }
+
+        .container {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .heatmap {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr); /* Adjust rows dynamically */
+            grid-template-columns: repeat(68, 1fr); /* Adjust columns dynamically */
+            width: 100%; /* Full width of the container */
+            height: 33%; /* Each heatmap takes up 1/3rd of the screen */
+        }
+
+        .heatmap_cell {
+            border: 1px solid black;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .dark-red {
+            background-color: darkslategrey;
+        }
+
+        .dark-green {
+            background-color: green;
+        }
+
+        .light-green {
+            background-color: orange;
+        }
+
+        .key {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 100;
+            font-size: 0.8em;
+            border: 1px solid white;
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            visibility: hidden;
+            z-index: 101;
+        }
+
+        .heatmap_cell:hover .tooltip,
+        .heatmap_cell:focus .tooltip {
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <div class="key">
+        <p><span style="color: orange;">■</span> Negotiating</p>
+        <p><span style="color: green;">■</span> Licensed</p>
+    </div>
+    <div class="container">
+        <div class="heatmap" id="heatmap1"></div>
+        <div class="heatmap" id="heatmap2"></div>
+        <div class="heatmap" id="heatmap3"></div>
+    </div>
+    <script>
+        function createHeatmap(heatmapId) {
+            const heatmap = document.getElementById(heatmapId);
+
+            for (let row = 0; row < 6; row++) {
+                for (let col = 0; col < 68; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'heatmap_cell dark-red';
+
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+                    tooltip.innerText = `Row: ${row}, Col: ${col}`;
+
+                    cell.appendChild(tooltip);
+                    heatmap.appendChild(cell);
+                }
+            }
+        }
+
+        createHeatmap('heatmap1');
+        createHeatmap('heatmap2');
+        createHeatmap('heatmap3');
+    </script>
+</body>
+</html>
