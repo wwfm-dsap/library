@@ -7,6 +7,16 @@
     <style>
         @import "https://assets.codepen.io/3351103/__reset.css";
 
+         a {
+    color: #007BFF; /* A nice bright blue */
+    text-decoration: none; /* Removes the underline */
+}
+
+a:hover {
+    color: #0056b3; /* A slightly darker shade for hover effect */
+    text-decoration: underline; /* Adds the underline on hover */
+}
+
         :root {
             --bg-color: #111;
             --text-color: #f8f8f8;
@@ -220,7 +230,7 @@ function createAccordion(data, container, level = 0, parentId = "", countryCode 
 
         let label = document.createElement("label");
         label.className = level === 0 ? "accordion country-item" : `sub-accordion lvl-${level + 1}`;
-        label.innerHTML = `<span class="caret"></span> ${item.name} <a class="uid" href="/en/${uid}/" onclick="event.stopPropagation();">${uid}</a>`;
+        label.innerHTML = `<span class="caret"></span> ${item.name} <a class="uid" href="./${uid}/" onclick="event.stopPropagation();">${uid}</a>`;
         label.addEventListener("click", function(e) {
             e.preventDefault();
             const dropdown = this.nextElementSibling;
@@ -273,7 +283,7 @@ fetch('data.json')
                         }
                         // Create the country label with UID as hyperlink
                         let formattedCountryUid = formatUID(country.country_uid, 0, countryCode);
-                        countryLabel.innerHTML = `<span class="caret"></span> ${country.name} <a class="uid" href="/en/${formattedCountryUid}/" onclick="event.stopPropagation();">${formattedCountryUid}</a>`;
+                        countryLabel.innerHTML = `<span class="caret"></span> ${country.name} <a class="uid" href="./${formattedCountryUid}/" onclick="event.stopPropagation();">${formattedCountryUid}</a>`;
                         container.appendChild(countryLabel);
 
                         let countryDropdown = document.createElement("div");

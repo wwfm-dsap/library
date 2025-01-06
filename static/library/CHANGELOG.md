@@ -9,6 +9,7 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [library.10] - Q1/2025
 
 ### Changed
+Jan-05 - minor bug fixes. And there's an issue with github hosting so many files. Maybe need to use a json to simulate dynamic db  
 Jan-05 - all regions folders are in the root (can't hide them with a dot with Netlify, which is a shame). so 'en` is removed    
 Jan-05 - Added README.md , changed script 3.sh and heatmap.html (now status.html) to make and use `regions` not `en` filepath  
 Jan 04 - Fixed permissions  
