@@ -2,46 +2,104 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, initial-scale=1, maximum-scale=1">
-    <title>Responsive Heatmap</title>
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no" name="viewport">
-        <link href="_theme-explorer/favicons/apple-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
-        <link href="_theme-explorer/favicons/apple-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
-        <link href="_theme-explorer/favicons/apple-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
-        <link href="_theme-explorer/favicons/apple-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
-        <link href="_theme-explorer/favicons/apple-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
-        <link href="_theme-explorer/favicons/apple-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
-        <link href="_theme-explorer/favicons/apple-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
-        <link href="_theme-explorer/favicons/apple-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
-        <link href="_theme-explorer/favicons/apple-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
-        <link href="_theme-explorer/favicons/android-icon-192x192.png" rel="icon" sizes="192x192" type="image/png">
-        <link href="_theme-explorer/favicons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
-        <link href="_theme-explorer/favicons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
-        <link href="_theme-explorer/favicons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
-        <link rel="manifest" href="manifest.json">
-        <meta content="_theme-explorer/favicons/ms-icon-144x144.png" name="msapplication-TileImage">
-        <link rel="stylesheet" href="style.css">
-<style>
-html {
-  overflow-y:   scroll;
-  overflow-x:   hidden;
-}
-::-webkit-scrollbar {
-  width: 0px;
-  background: transparent; /* make scrollbar transparent */
-}
-</style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WWFM-DSAP Public Records Heatmap</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #111;
+        }
+
+        .heatmap {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            grid-template-columns: repeat(68, 1fr);
+            width: 100vw;
+            height: calc(100vh / 3 - 10px);
+            margin-bottom: 10px;
+        }
+
+        .heatmap_cell {
+            border: 1px solid black;
+            position: relative;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .dark-red {
+            background-color: darkslategrey;
+            border: 1px solid darkturquoise;
+        }
+
+        .dark-green {
+            background-color: green;
+            border: 1px solid green;
+        }
+
+        .light-green {
+            border: 1px solid orange;
+        }
+
+        .key {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding-top: 1vh;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 100;
+            font-size: 0.8em;
+            border: 1px solid white;
+            min-height: 68px;
+            min-width: 78px;
+            width: 71px;
+            height: 64px;
+            line-height: 15px;
+            padding-bottom: 10px;
+            padding-left: 20px;
+            padding-right: 15px;
+            max-width: 78px;
+            max-height: 74px;
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            visibility: hidden;
+            z-index: 101;
+            transition: visibility 0s linear 0.5s, opacity 0.5s linear;
+            opacity: 0;
+            width: 200px;
+        }
+
+        .heatmap_cell:hover .tooltip,
+        .heatmap_cell:focus .tooltip {
+            visibility: visible;
+            opacity: 1;
+            transition-delay: 0s;
+        }
+    </style>
 </head>
 <body>
     <div class="key">
         <p><span style="color: orange;">■</span> Negotiating</p>
         <p><span style="color: green;">■</span> Licensed</p>
     </div>
-    <div class="container">
-        <div class="heatmap" id="heatmap1"></div>
-        <div class="heatmap" id="heatmap2"></div>
-        <div class="heatmap" id="heatmap3"></div>
-    </div>
+    <div class="heatmap" id="heatmap1"></div>
+    <div class="heatmap" id="heatmap2"></div>
+    <div class="heatmap" id="heatmap3"></div>
     <script>
         async function fetchData() {
             try {
@@ -69,7 +127,7 @@ html {
             try {
                 const response = await fetch('index.csv');
                 const text = await response.text();
-                const lines = text.split('\n').filter(Boolean); // Remove empty lines
+                const lines = text.split('\n').filter(Boolean);  // Remove empty lines
                 return lines.map(line => {
                     const [code, name] = line.split(',').map(item => item.replace(/"/g, '').trim());
                     return { code: code.toLowerCase(), name };
@@ -145,7 +203,7 @@ html {
                     const uidFormat = `${prefix}-00000-000000-0000000-00000000`;
 
                     if (existingUIDs.includes(uidFormat)) {
-                        tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><a href="${uidFormat}" target="_self" style="color: white;">View records</a>`;
+                        tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><a href="${uidFormat}" target="_blank" style="color: white;">View records</a>`;
                     } else {
                         tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><span style="color: grey;">View records</span>`;
                     }
@@ -184,9 +242,6 @@ html {
             createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap1');
             createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap2');
             createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap3');
-
-            // Allow scrolling only after initialization
-            document.documentElement.style.overflow = 'hidden';
         }
 
         init();

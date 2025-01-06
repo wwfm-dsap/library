@@ -43,6 +43,13 @@
             background-position: center;
         }
 
+/* Rotate flags 90 degrees anticlockwise */
+.heatmap_cell img {
+    transform: rotate(-90deg);
+    width: 100%;
+    height: auto;
+}
+
         .dark-red {
             background-color: darkslategrey;
         }
@@ -88,9 +95,24 @@
     white-space: normal; /* Allow wrapping */
 }
 
+.heatmap_cell .tooltip {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.75);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease-in-out;
+}
+
 
         .heatmap_cell:hover .tooltip,
         .heatmap_cell:focus .tooltip {
             visibility: visible;
+            opacity:1;
         }
 
