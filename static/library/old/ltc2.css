@@ -1,0 +1,269 @@
+heatmap {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(68, 1fr);
+    width: 100%;
+    height: 30vh;
+}
+}.heatmap_cell:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+.heatmap_cell:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+.flag {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform: rotate(90deg);
+    transform-origin: center;
+    object-fit: cover;
+    top: 0;
+    left: 0;
+}
+.flag-af {
+    background-image: url('_theme-explorer/flag/af.png');
+}
+.flag-al {
+    background-image: url('_theme-explorer/flag/al.png');
+}
+.flag-as {
+    background-image: url('_theme-explorer/flag/as.png');
+}
+.flag-ad {
+    background-image: url('_theme-explorer/flag/ad.png');
+}
+.flag-ao {
+    background-image: url('_theme-explorer/flag/ao.png');
+}
+.flag-ag {
+    background-image: url('_theme-explorer/flag/ag.png');
+}
+.flag-ar {
+    background-image: url('_theme-explorer/flag/ar.png');
+}
+.flag-am {
+    background-image: url('_theme-explorer/flag/am.png');
+}
+.flag-au {
+    background-image: url('_theme-explorer/flag/au.png');
+}
+.flag-at {
+    background-image: url('_theme-explorer/flag/at.png');
+}
+.flag-az {
+    background-image: url('_theme-explorer/flag/az.png');
+}
+.flag-ba {
+    background-image: url('_theme-explorer/flag/ba.png');
+}
+.flag-bb {
+    background-image: url('_theme-explorer/flag/bb.png');
+}
+.flag-bd {
+    background-image: url('_theme-explorer/flag/bd.png');
+}
+.flag-be {
+    background-image: url('_theme-explorer/flag/be.png');
+}
+.flag-bf {
+    background-image: url('_theme-explorer/flag/bf.png');
+}
+.flag-bg {
+    background-image: url('_theme-explorer/flag/bg.png');
+}
+.flag-bh {
+    background-image: url('_theme-explorer/flag/bh.png');
+}
+.flag-bi {
+    background-image: url('_theme-explorer/flag/bi.png');
+}
+.flag-bj {
+    background-image: url('_theme-explorer/flag/bj.png');
+}
+.flag-bl {
+    background-image: url('_theme-explorer/flag/bl.png');
+}
+.flag-bm {
+    background-image: url('_theme-explorer/flag/bm.png');
+}
+.flag-bn {
+    background-image: url('_theme-explorer/flag/bn.png');
+}
+.flag-bo {
+    background-image: url('_theme-explorer/flag/bo.png');
+}
+.flag-bq {
+    background-image: url('_theme-explorer/flag/bq.png');
+}
+.flag-br {
+    background-image: url('_theme-explorer/flag/br.png');
+}
+.flag-bs {
+    background-image: url('_theme-explorer/flag/bs.png');
+}
+.flag-bt {
+    background-image: url('_theme-explorer/flag/bt.png');
+}
+.flag-bv {
+    background-image: url('_theme-explorer/flag/bv.png');
+}
+.flag-bw {
+    background-image: url('_theme-explorer/flag/bw.png');
+}
+.flag-by {
+    background-image: url('_theme-explorer/flag/by.png');
+}
+.flag-bz {
+    background-image: url('_theme-explorer/flag/bz.png');
+}
+::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+}
+.container {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
+    width: 99.99vw;
+    height: 99vh;
+    overflow: hidden;
+}
+.heatmap {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(68, 1fr);
+    width: 99.99vw;
+    height: 30vh;
+    overflow-y: visible;
+    overflow-x: visible;
+}
+.heatmap_cell:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+.dark-red {
+    background-color: rgba(0, 0, 0, 0.1);
+    border: .5px solid rgba(186, 184, 108, 1);
+}
+.dark-green {
+    background-color: green;
+}
+.light-green {
+    background-color: rgba(255, 102, 0, 0.9);
+}
+@media only screen and (max-width:768px) {
+    html {
+    font-size: calc((2vh+2vw) / 1.1);
+}
+}.key {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    z-index: 100;
+    font-size: .8em;
+    border: 1px solid white;
+}
+heatmap {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(68, 1fr);
+    width: 100%;
+    height: 30vh;
+}
+}.heatmap_cell:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+.flag {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    transform: rotate(90deg);
+    transform-origin: center;
+    object-fit: cover;
+    top: 0;
+    left: 0;
+}
+html, body {
+    overflow: hidden!important;
+    width: 99.99vw;
+    height: 99.99vh;
+    margin: 0;
+    padding: 0;
+    background: darkolivegreen;
+}
+::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+}
+.container {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
+    width: 99.99vw;
+    height: 99vh;
+    overflow: hidden;
+}
+.heatmap {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(68, 1fr);
+    width: 99.99vw;
+    height: 30vh;
+    overflow-y: visible;
+    overflow-x: visible;
+}
+.heatmap_cell {
+    position: relative;
+    width: calc(99vw / 86);
+    height: calc(99vh / 20);
+    display: inline-block;
+    margin: 0;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: background-color .2s ease-in-out;
+    overflow: hidden;
+}
+.heatmap_cell:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+.heatmap_cell .tooltip {
+    position: absolute;
+    top: -49px;
+    left: 59px;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.75);
+    padding: 5px;
+    border-radius: 5px;
+    transition: opacity .2s ease-in-out;
+}
+.heatmap_cell:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+.dark-green {
+    background-color: green;
+}
+.light-green {
+    background-color: rgba(255, 102, 0, 0.9);
+}
+@media only screen and (max-width:768px) {
+    html {
+    font-size: calc((2vh+2vw) / 1.1);
+}
+}.key {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.5);
+    padding: 10px;
+    color: rgba(255, 255, 255, 0.7);
+    z-index: 100;
+    font-size: .8em;
+    border: 1px solid white;
+}
+

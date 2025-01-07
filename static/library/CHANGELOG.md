@@ -9,6 +9,7 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [library.10] - Q1/2025
 
 ### Changed
+Jan-07 - local server storage down. Recovery didn't go well. See the latest -  needs work   
 Jan-06 - Few different status themes, but best one was an earlier one, so that's primary now - still needs work tho  
 Jan-05 - Made Tooltip stop going off screen  
 Jan-05 - Minor bug fixes. And there's an issue with github hosting so many files. Maybe need to use a json to simulate dynamic db  

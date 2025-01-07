@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wireframe Earth</title>
+    <link rel="stylesheet" href="styles.css">
+    <meta http-equiv="refresh" content="5;url=status.html"> <!-- Redirect after 3 seconds -->
+    <style>
+    /* General reset for margin, padding, and box-sizing */
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    /* Full-screen container */
+    body, html {
+        height: 100%;
+        background: #000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column; /* To place text below the globe */
+        overflow: hidden;
+    }
+
+    /* Loading text */
+    .loading-text {
+        color: #00FFFF;
+        font-family: Arial, sans-serif;
+        font-size: 24px;
+        margin-top: 20px;
+    }
+
+    /* 3D globe container */
+    .globe {
+        position: relative;
+        width: 300px;
+        height: 300px;
+        transform-style: preserve-3d;
+        animation: rotate 20s infinite linear;
+    }
+
+    /* Sphere shape for the globe */
+    .sphere {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        transform-style: preserve-3d;
+        transform: rotateX(0deg) rotateY(0deg);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    /* Wireframe effect for the globe */
+    .wireframe {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: rgba(0, 255, 255, 0.3);
+        border: 1px solid rgba(0, 255, 255, 0.6);
+        transform: rotateX(60deg) rotateY(60deg);
+    }
+
+    /* Animation for rotation */
+    @keyframes rotate {
+        from {
+            transform: rotateY(0deg);
+        }
+        to {
+            transform: rotateY(360deg);
+        }
+    }
+
+    /* Hidden iframe for preloading */
+    .preload-iframe {
+        display: none;
+    }
+    </style>
+</head>
+<body>
+    <div class="globe">
+        <div class="sphere">
+            <div class="wireframe"></div>
+        </div>
+    </div>
+    <div class="loading-text">Loading ...</div>
+    <iframe src="status.html" class="preload-iframe"></iframe>
+</body>
+</html>
