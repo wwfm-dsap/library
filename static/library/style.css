@@ -1,12 +1,12 @@
 @import "https://assets.codepen.io/3351103/__reset.css";
 
 a {
-    color: #007BFF!important; 
+    color: #007BFF!important;
     text-decoration: none;
 }
 
 a:hover {
-    color: #0056b3; 
+    color: #0056b3;
     text-decoration: underline;
 }
 
@@ -31,27 +31,6 @@ html, body {
     margin: 0;
     padding: 0;
     background: #111;
-}
-
- .tooltip-top-right {
-     top: 100%;
-     right: 100%;
-     transform: translate(1px, -1px);
- }
- .tooltip-top-left {
-     top: 100%;
-     left: 100%;
-     transform: translate(-1px, -1px);
- }
- .tooltip-bottom-right {
-     bottom: 100%;
-     right: 100%;
-     transform: translate(1px, 1px);
- }
- .tooltip-bottom-left {
-     bottom: 100%;
-     left: 100%;
-     transform: translate(-1px, 1px);
 }
 
 ::-webkit-scrollbar {
@@ -79,14 +58,6 @@ html, body {
 
 .heatmap_cell {
     position: relative;
-    width: calc(99vw / 68);
-    height: calc(30vh / 6);
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    transition: background-color 0.2s ease-in-out;
-    border-left: 2px solid rgba(255, 255, 255, 0.1);
-    border-top: 2px solid rgba(255, 255, 255, 0.2);
     border: 0.1px dotted rgba(128, 128, 0, 1);
 }
 
@@ -109,9 +80,20 @@ html, body {
     padding: 11px;
 }
 
-.heatmap_cell:hover .tooltip {
-    visibility: visible;
-    opacity: 1;
+.tooltip-left {
+    right: 100%;
+}
+
+.tooltip-right {
+    left: 100%;
+}
+
+.tooltip-top {
+    bottom: 100%;
+}
+
+.tooltip-bottom {
+    top: 100%;
 }
 
 .dark-red {
@@ -138,3 +120,4 @@ html, body {
     font-size: 2vw;
     border: 1px solid white;
 }
+

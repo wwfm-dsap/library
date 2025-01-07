@@ -2,42 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     <title>Responsive Heatmap</title>
-  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, shrink-to-fit=no" name="viewport">
-        <link href="_theme-explorer/favicons/apple-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
-        <link href="_theme-explorer/favicons/apple-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
-        <link href="_theme-explorer/favicons/apple-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
-        <link href="_theme-explorer/favicons/apple-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
-        <link href="_theme-explorer/favicons/apple-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
-        <link href="_theme-explorer/favicons/apple-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
-        <link href="_theme-explorer/favicons/apple-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
-        <link href="_theme-explorer/favicons/apple-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
-        <link href="_theme-explorer/favicons/apple-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
-        <link href="_theme-explorer/favicons/android-icon-192x192.png" rel="icon" sizes="192x192" type="image/png">
-        <link href="_theme-explorer/favicons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
-        <link href="_theme-explorer/favicons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
-        <link href="_theme-explorer/favicons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
-        <link rel="manifest" href="manifest.json">
-        <meta content="_theme-explorer/favicons/ms-icon-144x144.png" name="msapplication-TileImage">
-        <link rel="stylesheet" href="style.css">
-<style>
-
-  html {
-        overflow-y: scroll;
-        overflow-x: hidden;
-    }
-
-::-webkit-scrollbar {
-  width: 0px;
-  background: transparent; /* make scrollbar transparent */
-}
-.heatmap_cell {
-  /* ... existing styles ... */
-  /* If you want flags to not interfere with cell color */
-  background-blend-mode: overlay; /* Optional */
-}
-</style>
+    <link href="_theme-explorer/favicons/apple-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+    <link href="_theme-explorer/favicons/apple-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+    <link href="_theme-explorer/favicons/apple-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+    <link href="_theme-explorer/favicons/apple-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+    <link href="_theme-explorer/favicons/apple-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+    <link href="_theme-explorer/favicons/apple-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+    <link href="_theme-explorer/favicons/apple-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+    <link href="_theme-explorer/favicons/apple-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+    <link href="_theme-explorer/favicons/apple-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+    <link href="_theme-explorer/favicons/android-icon-192x192.png" rel="icon" sizes="192x192" type="image/png">
+    <link href="_theme-explorer/favicons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+    <link href="_theme-explorer/favicons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+    <link href="_theme-explorer/favicons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+    <link rel="manifest" href="manifest.json">
+    <meta content="_theme-explorer/favicons/ms-icon-144x144.png" name="msapplication-TileImage">
+    <link rel="stylesheet" href="style3.css">
 </head>
 <body>
     <div class="key">
@@ -130,23 +112,50 @@ function getCellColor(count) {
     }
 }
 
-function adjustTooltipPosition(tooltip) {
-    const rect = tooltip.getBoundingClientRect();
+function adjustTooltipPosition(tooltip, cell) {
+    const rect = cell.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
+    const centerX = viewportWidth / 2;
+    const centerY = viewportHeight / 2;
 
-    // Adjust horizontally if the tooltip overflows
-    if (rect.right > viewportWidth) {
-        tooltip.style.left = `${viewportWidth - rect.width - 10}px`; // Shift left
-    } else if (rect.left < 0) {
-        tooltip.style.left = `10px`; // Shift right
+    // Determine which sides of the cell are closest to the center of the screen
+    const isLeftCloser = rect.left + rect.width / 2 > centerX;
+    const isTopCloser = rect.top + rect.height / 2 > centerY;
+
+    // Reset any previous positioning
+    tooltip.style.left = '';
+    tooltip.style.right = '';
+    tooltip.style.top = '';
+    tooltip.style.bottom = '';
+
+    // Horizontal positioning
+    if (isLeftCloser) {
+        tooltip.style.right = `${rect.width + 1}px`; // Adjacent to cell, not overlapping
+        tooltip.classList.add('tooltip-left');
+    } else {
+        tooltip.style.left = `${rect.width + 1}px`; // Adjacent to cell, not overlapping
+        tooltip.classList.add('tooltip-right');
     }
 
-    // Adjust vertically if the tooltip overflows
-    if (rect.bottom > viewportHeight) {
-        tooltip.style.top = `${viewportHeight - rect.height - 10}px`; // Shift up
-    } else if (rect.top < 0) {
-        tooltip.style.top = `10px`; // Shift down
+    // Vertical positioning
+    if (isTopCloser) {
+        tooltip.style.bottom = `${rect.height + 1}px`; // Adjacent to cell, not overlapping
+        tooltip.classList.add('tooltip-top');
+    } else {
+        tooltip.style.top = `${rect.height + 1}px`; // Adjacent to cell, not overlapping
+        tooltip.classList.add('tooltip-bottom');
+    }
+
+    // Adjust for correct corner touch
+    if (tooltip.classList.contains('tooltip-left') && tooltip.classList.contains('tooltip-top')) {
+        tooltip.classList.add('tooltip-top-left');
+    } else if (tooltip.classList.contains('tooltip-left') && tooltip.classList.contains('tooltip-bottom')) {
+        tooltip.classList.add('tooltip-bottom-left');
+    } else if (tooltip.classList.contains('tooltip-right') && tooltip.classList.contains('tooltip-top')) {
+        tooltip.classList.add('tooltip-top-right');
+    } else if (tooltip.classList.contains('tooltip-right') && tooltip.classList.contains('tooltip-bottom')) {
+        tooltip.classList.add('tooltip-bottom-right');
     }
 }
 
@@ -162,7 +171,7 @@ function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatma
 
             // Specifically for columns 185 and 186
             if (originalCol === 185 || originalCol === 186) {
-                cellColor = 'light-green'; // Orange color for these columns
+                cellColor = 'light-green';
             }
 
             const cell = document.createElement('div');
@@ -172,9 +181,9 @@ function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatma
             if (row === 0 && countryIndex[originalCol]) {
                 const countryCode = countryIndex[originalCol].code;
                 cell.style.backgroundImage = `url('_theme-explorer/flag/${countryCode}.png')`;
-                cell.style.backgroundSize = 'contain'; // Ensure flag fits within cell
+                cell.style.backgroundSize = 'contain';
                 cell.style.backgroundRepeat = 'no-repeat';
-                cell.style.backgroundPosition = 'center'; // Center the flag in the cell
+                cell.style.backgroundPosition = 'center';
             }
 
             const tooltip = document.createElement('div');
@@ -200,9 +209,7 @@ function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatma
             cell.addEventListener('mouseenter', () => {
                 tooltip.style.visibility = 'visible';
                 tooltip.style.opacity = 1;
-
-                // Adjust tooltip position to prevent overflow
-                adjustTooltipPosition(tooltip);
+                adjustTooltipPosition(tooltip, cell);
             });
 
             // Hide tooltip on mouse leave
@@ -247,6 +254,5 @@ async function init() {
 
 init();
 </script>
-
 </body>
 </html>
