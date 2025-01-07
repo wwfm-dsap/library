@@ -9,7 +9,8 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [library.10] - Q1/2025
 
 ### Changed
-Jan-07 - local server storage down. Recovery didn't go well. See the latest -  needs work   
+Jan-07 - On this 7th day, I am adding a flag to the data,and revising 1.sh,2.sh and 3.sh to only fetch directories of signed administrative divisions. Pulling them all is too huge for the interim framework e.g. github monorepo (will need to circle back to solve scaling e.g. impliment IPFS or something    
+Jan-06 - Local server storage down. Recovery didn't go well. See the latest -  needs work   
 Jan-06 - Few different status themes, but best one was an earlier one, so that's primary now - still needs work tho  
 Jan-05 - Made Tooltip stop going off screen  
 Jan-05 - Minor bug fixes. And there's an issue with github hosting so many files. Maybe need to use a json to simulate dynamic db  

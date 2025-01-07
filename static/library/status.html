@@ -20,7 +20,7 @@
         <link href="_theme-explorer/favicons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
         <link rel="manifest" href="manifest.json">
         <meta content="_theme-explorer/favicons/ms-icon-144x144.png" name="msapplication-TileImage">
-        <link rel="stylesheet" href="hybrid2.css">
+        <link rel="stylesheet" href="style.css">
 <style>
 
   html {
@@ -41,8 +41,8 @@
 </head>
 <body>
     <div class="key">
-        <p><span style="color: orange;">■</span> Negotiating</p>
-        <p><span style="color: green;">■</span> Licensed</p>
+        <p><span style="border:1px solid white; color: yellow;">■</span> Licensed</p>
+        <p><span style="border:1px solid white; color: black;">■</span> Negotiating</p>
     </div>
     <div class="container">
         <div class="heatmap" id="heatmap1"></div>
@@ -173,7 +173,7 @@ function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatma
                 const countryCode = countryIndex[originalCol].code;
                 cell.style.backgroundImage = `url('_theme-explorer/flag/${countryCode}.png')`;
                 cell.style.backgroundSize = 'contain'; // Ensure flag fits within cell
-                cell.style.backgroundRepeat = 'no-repeat'; // Don't repeat the image
+                cell.style.backgroundRepeat = 'no-repeat';
                 cell.style.backgroundPosition = 'center'; // Center the flag in the cell
             }
 
