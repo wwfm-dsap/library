@@ -159,6 +159,8 @@ function adjustTooltipPosition(tooltip, cell) {
     }
 }
 
+let activeTooltip = null;
+
 function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatmapId) {
     const heatmap = document.getElementById(heatmapId);
 
@@ -168,11 +170,6 @@ function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatma
             const prefix = `${String(originalCol).padStart(3, '0')}-${String(row).padStart(4, '0')}`;
             const count = counts.get(prefix) || 0;
             let cellColor = getCellColor(count);
-
-            // Specifically for columns 185 and 186
-            if (originalCol === 185 || originalCol === 186) {
-                cellColor = 'light-green';
-            }
 
             const cell = document.createElement('div');
             cell.className = `heatmap_cell ${cellColor}`;
@@ -203,25 +200,58 @@ function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatma
             tooltip.style.position = 'absolute';
             tooltip.style.visibility = 'hidden';
             tooltip.style.opacity = 0;
-            tooltip.style.transition = 'opacity 0.2s ease-in-out';
+            tooltip.style.transition = 'opacity 0.2s ease-in-out, visibility 2.2s ease-in-out!important';
 
             // Show and adjust tooltip on hover
             cell.addEventListener('mouseenter', () => {
-                tooltip.style.visibility = 'visible';
-                tooltip.style.opacity = 1;
-                adjustTooltipPosition(tooltip, cell);
+                if (activeTooltip && activeTooltip !== tooltip) {
+                    hideTooltip(activeTooltip);
+                }
+                showTooltip(tooltip, cell);
+                activeTooltip = tooltip;
             });
 
-            // Hide tooltip on mouse leave
+            // Manage tooltip visibility with delay
+            let hideTimeout = null;
             cell.addEventListener('mouseleave', () => {
-                tooltip.style.visibility = 'hidden';
-                tooltip.style.opacity = 0;
+                hideTimeout = setTimeout(() => {
+                    hideTooltip(tooltip);
+                    if (activeTooltip === tooltip) {
+                        activeTooltip = null;
+                    }
+                }, 10500); // 500ms delay before hiding
+            });
+
+            tooltip.addEventListener('mouseenter', () => {
+                if (hideTimeout) {
+                    clearTimeout(hideTimeout);
+                }
+            });
+
+            tooltip.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(() => {
+                    hideTooltip(tooltip);
+                    if (activeTooltip === tooltip) {
+                        activeTooltip = null;
+                    }
+                }, 500); // 500ms delay before hiding if mouse leaves tooltip
             });
 
             cell.appendChild(tooltip);
             heatmap.appendChild(cell);
         }
     }
+}
+
+function showTooltip(tooltip, cell) {
+    tooltip.style.visibility = 'visible';
+    tooltip.style.opacity = 1;
+    adjustTooltipPosition(tooltip, cell);
+}
+
+function hideTooltip(tooltip) {
+    tooltip.style.visibility = 'hidden';
+    tooltip.style.opacity = 0;
 }
 
 async function init() {

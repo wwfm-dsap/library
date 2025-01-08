@@ -8,7 +8,8 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [library.10] - Q1/2025
 
-### Changed
+### Changed)
+Jan-07 - Quitting (committing) while ahead with static/library - see that folders own changelog for details   
 Jan-04 - 2nd stab at permissions  
 Jan 04 - Fixed permissions  
 Jan-04 - Improved heatmap with ledger and label on mouseover/ touch  

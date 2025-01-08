@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>WWFM Library</title>
+    <style>
+        body, html {
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .loading-text {
+            color: #00FFFF;
+            font-family: Arial, sans-serif;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        .globe {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            transform-style: preserve-3d;
+            animation: rotate 20s infinite linear;
+        }
+        .sphere {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transform-style: preserve-3d;
+            transform: rotateX(0deg) rotateY(0deg);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+        .wireframe {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(0, 255, 255, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.6);
+            transform: rotateX(60deg) rotateY(60deg);
+        }
+        @keyframes rotate {
+            from {
+                transform: rotateY(0deg);
+            }
+            to {
+                transform: rotateY(360deg);
+            }
+        }
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* CSS from status.html */
+        .key {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 10px;
+            color: rgba(255, 255, 255, 0.7);
+            z-index: 100;
+            font-size: 2vw;
+            border: 1px solid white;
+        }
+        .container {
+            display: grid;
+            grid-template-rows: 1fr 1fr 1fr;
+            grid-template-columns: 1fr;
+            width: 99.99vw;
+            height: 99.99vh;
+            overflow: hidden;
+        }
+        .heatmap {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr);
+            grid-template-columns: repeat(68, 1fr);
+            width: 99.99vw;
+            height: 30vh;
+            overflow: visible;
+        }
+        .heatmap_cell {
+            position: relative;
+            border: 0.1px dotted rgba(128, 128, 0, 1);
+        }
+        .heatmap_cell:hover {
+              background-color: #0000FF; 
+        }
+        .heatmap_cell .tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.36);
+            border-radius: 5px;
+            transition: opacity 0.2s ease-in-out;
+            visibility: hidden;
+            opacity: 0;
+            white-space: normal;
+            z-index: 1;
+            min-width: 90px;
+            color: white;
+            border: 0.1px solid rgba(255, 255, 255, 0.9);
+            padding: 11px;
+        }
+        .tooltip-left {
+            right: 100%;
+        }
+        .tooltip-right {
+            left: 100%;
+        }
+        .tooltip-top {
+            bottom: 100%;
+        }
+        .tooltip-bottom {
+            top: 100%;
+        }
+        .dark-red {
+            background-color: rgba(0, 0, 0, 0.1);
+            border: 0.5px solid rgba(186, 184, 108, 0.25);
+        }
+        .dark-green {
+            background-color: green;
+        }
+        .light-green {
+            background-color: rgba(255, 102, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loader from loading.html -->
+    <div class="loader-overlay">
+        <div class="globe">
+            <div class="sphere">
+                <div class="wireframe"></div>
+            </div>
+        </div>
+        <div class="loading-text">Loading ...</div>
+    </div>
+    <!-- Content from status.html -->
+    <div class="key">
+        <p><span style="border:1px solid white; color: yellow;">■</span> Licensed</p>
+        <p><span style="border:1px solid white; color: black;">■</span> Negotiating</p>
+    </div>
+    <div class="container">
+        <div class="heatmap" id="heatmap1"></div>
+        <div class="heatmap" id="heatmap2"></div>
+        <div class="heatmap" id="heatmap3"></div>
+    </div>
+    
+    <script>
+    async function fetchData() {
+        try {
+            const response = await fetch('data.json');
+            const data = await response.json();
+            return data.countries;
+        } catch (error) {
+            console.error('Error fetching data:', error);
+            return null;
+        }
+    }
+
+    async function fetchCountryData(filename) {
+        try {
+            const response = await fetch(filename);
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error(`Error fetching data from ${filename}:`, error);
+            return null;
+        }
+    }
+
+    async function fetchIndex() {
+        try {
+            const response = await fetch('index.csv');
+            const text = await response.text();
+            const lines = text.split('\n').filter(Boolean); // Remove empty lines
+            return lines.map(line => {
+                const [code, name] = line.split(',').map(item => item.replace(/"/g, '').trim());
+                return { code: code.toLowerCase(), name };
+            });
+        } catch (error) {
+            console.error('Error fetching index.csv:', error);
+            return [];
+        }
+    }
+
+    function extractUIDs(data) {
+        const uids = [];
+
+        function recurse(obj) {
+            if (obj.uid) {
+                uids.push(obj.uid);
+            }
+            for (const key in obj) {
+                if (typeof obj[key] === 'object') {
+                    recurse(obj[key]);
+                }
+            }
+        }
+
+        recurse(data);
+        return uids;
+    }
+
+    function countUIDs(uids) {
+        const counts = new Map();
+
+        for (const uid of uids) {
+            const parts = uid.split('-');
+
+            for (let i = 1; i <= parts.length; i++) {
+                const prefix = parts.slice(0, i).join('-');
+                counts.set(prefix, (counts.get(prefix) || 0) + 1);
+            }
+        }
+
+        return counts;
+    }
+
+    function getCellColor(count) {
+        if (count >= 10) {
+            return 'light-green';
+        } else if (count > 0) {
+            return 'dark-green';
+        } else {
+            return 'dark-red';
+        }
+    }
+
+function adjustTooltipPosition(tooltip, cell) {
+    const rect = cell.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const centerX = viewportWidth / 2;
+    const centerY = viewportHeight / 2;
+
+    // Determine which sides of the cell are closest to the center of the screen
+    const isLeftCloser = rect.left + rect.width / 2 > centerX;
+    const isTopCloser = rect.top + rect.height / 2 > centerY;
+
+    // Reset any previous positioning
+    tooltip.style.left = '';
+    tooltip.style.right = '';
+    tooltip.style.top = '';
+    tooltip.style.bottom = '';
+
+    // Calculate overlap (e.g., 12.5% of cell size for overlap)
+    const overlapSize = Math.min(rect.width, rect.height) * 0.015; // 12.5% overlap
+
+    // Horizontal positioning
+    if (isLeftCloser) {
+        tooltip.style.right = `-${overlapSize}px`; // Negative for inward overlap
+        tooltip.style.left = ''; // Clear left positioning
+        tooltip.classList.add('tooltip-left');
+        tooltip.classList.remove('tooltip-right');
+    } else {
+        tooltip.style.left = `-${overlapSize}px`; // Negative for inward overlap
+        tooltip.style.right = ''; // Clear right positioning
+        tooltip.classList.add('tooltip-right');
+        tooltip.classList.remove('tooltip-left');
+    }
+
+    // Vertical positioning
+    if (isTopCloser) {
+        tooltip.style.bottom = `-${overlapSize}px`; // Negative for inward overlap
+        tooltip.style.top = ''; // Clear top positioning
+        tooltip.classList.add('tooltip-top');
+        tooltip.classList.remove('tooltip-bottom');
+    } else {
+        tooltip.style.top = `-${overlapSize}px`; // Negative for inward overlap
+        tooltip.style.bottom = ''; // Clear bottom positioning
+        tooltip.classList.add('tooltip-bottom');
+        tooltip.classList.remove('tooltip-top');
+    }
+
+    // Adjust for correct corner touch
+    if (tooltip.classList.contains('tooltip-left') && tooltip.classList.contains('tooltip-top')) {
+        tooltip.classList.add('tooltip-top-left');
+        tooltip.classList.remove('tooltip-bottom-left', 'tooltip-top-right', 'tooltip-bottom-right');
+    } else if (tooltip.classList.contains('tooltip-left') && tooltip.classList.contains('tooltip-bottom')) {
+        tooltip.classList.add('tooltip-bottom-left');
+        tooltip.classList.remove('tooltip-top-left', 'tooltip-top-right', 'tooltip-bottom-right');
+    } else if (tooltip.classList.contains('tooltip-right') && tooltip.classList.contains('tooltip-top')) {
+        tooltip.classList.add('tooltip-top-right');
+        tooltip.classList.remove('tooltip-top-left', 'tooltip-bottom-left', 'tooltip-bottom-right');
+    } else if (tooltip.classList.contains('tooltip-right') && tooltip.classList.contains('tooltip-bottom')) {
+        tooltip.classList.add('tooltip-bottom-right');
+        tooltip.classList.remove('tooltip-top-left', 'tooltip-bottom-left', 'tooltip-top-right');
+    }
+}
+
+    let activeTooltip = null;
+    let contentLoaded = false;
+    let imagesLoaded = false;
+
+function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatmapId) {
+    const heatmap = document.getElementById(heatmapId);
+
+    for (let row = 0; row < 6; row++) {
+        for (let col = 0; col < 68; col++) {
+            const originalCol = (heatmapId === 'heatmap1' ? col : (heatmapId === 'heatmap2' ? col + 68 : col + 136));
+            const prefix = `${String(originalCol).padStart(3, '0')}-${String(row).padStart(4, '0')}`;
+            const count = counts.get(prefix) || 0;
+            let cellColor = getCellColor(count);
+
+            const cell = document.createElement('div');
+            cell.className = `heatmap_cell ${cellColor}`;
+
+            // Add flag as background image for cells in the first row
+            if (row === 0 && countryIndex[originalCol]) {
+                const countryCode = countryIndex[originalCol].code;
+                cell.style.backgroundImage = `url('_theme-explorer/flag/${countryCode}.png')`;
+                cell.style.backgroundSize = 'contain';
+                cell.style.backgroundRepeat = 'no-repeat';
+                cell.style.backgroundPosition = 'center';
+            }
+
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            const country = countryIndex[originalCol];
+            const countryCode = country ? country.code : null;
+            const countryName = country ? `(${countryCode.toUpperCase()}) ${country.name}` : `Country no.: ${originalCol + 1}`;
+            const divisionLevel = `Level ${row}`;
+            const uidFormat = `${prefix}-00000-000000-0000000-00000000`;
+
+            if (existingUIDs.includes(uidFormat)) {
+                tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><a href="${uidFormat}" target="_self" style="color: white;">View records</a>`;
+            } else {
+                tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><span style="color: grey;">View records</span>`;
+            }
+
+            tooltip.style.position = 'absolute';
+            tooltip.style.visibility = 'hidden';
+            tooltip.style.opacity = 0;
+            tooltip.style.transition = 'opacity 0.2s ease-in-out'; // Removed the 'visibility' transition
+
+            // Show and adjust tooltip on hover
+            cell.addEventListener('mouseenter', () => {
+                if (activeTooltip && activeTooltip !== tooltip) {
+                    hideTooltip(activeTooltip);
+                }
+                showTooltip(tooltip, cell);
+                activeTooltip = tooltip;
+            });
+
+            // Manage tooltip visibility with delay
+            let hideTimeout = null;
+            cell.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(() => {
+                    hideTooltip(tooltip);
+                    if (activeTooltip === tooltip) {
+                        activeTooltip = null;
+                    }
+                }, 8000); // Reinstated 10.5s delay before hiding
+            });
+
+            tooltip.addEventListener('mouseenter', () => {
+                if (hideTimeout) {
+                    clearTimeout(hideTimeout);
+                }
+            });
+
+            tooltip.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(() => {
+                    hideTooltip(tooltip);
+                    if (activeTooltip === tooltip) {
+                        activeTooltip = null;
+                    }
+                }, 8500); // 3500ms delay if mouse leaves tooltip
+            })
+
+            cell.appendChild(tooltip);
+            heatmap.appendChild(cell);
+        }
+    }
+}
+    function showTooltip(tooltip, cell) {
+        tooltip.style.visibility = 'visible';
+        tooltip.style.opacity = 1;
+        adjustTooltipPosition(tooltip, cell);
+    }
+
+    function hideTooltip(tooltip) {
+        tooltip.style.visibility = 'hidden';
+        tooltip.style.opacity = 0;
+    }
+
+    async function init() {
+        const [countryData, countryIndex] = await Promise.all([fetchData(), fetchIndex()]);
+
+        if (!countryData || !countryIndex.length) {
+            return;
+        }
+
+        let allUIDs = [];
+        let divisionNames = ["Level 0", "Level 1", "Level 2", "Level 3", "Level 4", "Level 5"];
+
+        for (const [index, country] of countryData.entries()) {
+            const data = await fetchCountryData(country.filename);
+
+            if (data) {
+                const uids = extractUIDs(data);
+                allUIDs = allUIDs.concat(uids);
+            }
+        }
+
+        const counts = countUIDs(allUIDs);
+        createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap1');
+        createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap2');
+        createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap3');
+
+        contentLoaded = true; // Set this flag when content is loaded
+        checkIfAllLoaded();
+    }
+
+    function checkIfAllLoaded() {
+        if (contentLoaded && imagesLoaded) {
+            document.querySelector('.loader-overlay').classList.add('hidden');
+        }
+    }
+
+    // Image loading check
+    document.addEventListener('DOMContentLoaded', () => {
+        const images = document.querySelectorAll('img');
+        let loadedImages = 0;
+
+        if (images.length === 0) {
+            imagesLoaded = true;
+            checkIfAllLoaded();
+            return;
+        }
+
+        images.forEach(img => {
+            if (img.complete) {
+                loadedImages++;
+            } else {
+                img.addEventListener('load', () => {
+                    loadedImages++;
+                    if (loadedImages === images.length) {
+                        imagesLoaded = true;
+                        checkIfAllLoaded();
+                    }
+                });
+            }
+        });
+    });
+
+    // Start the initialization process
+    init();
+    </script>
+</body>
+</html>
