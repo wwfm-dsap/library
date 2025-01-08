@@ -9,6 +9,7 @@ and [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [library.10] - Q1/2025
 
 ### Changed)
+Jan-08 - Believe I've improved the static/library  - see its changelog for details or visit library.wwfm-dsap.com to see results for yourself  
 Jan-07 - Quitting (committing) while ahead with static/library - see that folders own changelog for details   
 Jan-04 - 2nd stab at permissions  
 Jan 04 - Fixed permissions  

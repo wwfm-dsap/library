@@ -1,0 +1,112 @@
+/* General reset for margin, padding, and box-sizing */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Loading styles */
+body, html {
+    height: 100%;
+    background: #000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.loading-text {
+    color: #00FFFF;
+    font-family: Arial, sans-serif;
+    font-size: 24px;
+    margin-top: 20px;
+}
+
+.globe {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    transform-style: preserve-3d;
+    animation: rotate 20s infinite linear;
+}
+
+.sphere {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    transform-style: preserve-3d;
+    transform: rotateX(0deg) rotateY(0deg);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.wireframe {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(0, 255, 255, 0.3);
+    border: 1px solid rgba(0, 255, 255, 0.6);
+    transform: rotateX(60deg) rotateY(60deg);
+}
+
+@keyframes rotate {
+    from {
+        transform: rotateY(0deg);
+    }
+    to {
+        transform: rotateY(360deg);
+    }
+}
+
+/* Status table styles */
+:root {
+    --bg-color: #111;
+    --text-color: #f8f8f8;
+    --accent-color: #f68a1e;
+}
+
+body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.container {
+    display: grid;
+    grid-template-rows: 1fr 1fr 1fr;
+    grid-template-columns: 1fr;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.heatmap {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
+    grid-template-columns: repeat(68, 1fr);
+}
+
+.heatmap_cell {
+    position: relative;
+    border: 0.1px dotted rgba(128, 128, 0, 1);
+}
+
+.heatmap_cell:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.dark-red {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.dark-green {
+    background-color: green;
+}
+
+.light-green {
+    background-color: rgba(255, 102, 0, 0.15);
+}
+
+

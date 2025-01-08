@@ -171,6 +171,7 @@
         try {
             const response = await fetch('data.json');
             const data = await response.json();
+            console.log('Fetched data:', data);
             return data.countries;
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -182,6 +183,7 @@
         try {
             const response = await fetch(filename);
             const data = await response.json();
+            console.log(`Fetched data from ${filename}:`, data);
             return data;
         } catch (error) {
             console.error(`Error fetching data from ${filename}:`, error);
@@ -194,6 +196,7 @@
             const response = await fetch('index.csv');
             const text = await response.text();
             const lines = text.split('\n').filter(Boolean); // Remove empty lines
+            console.log('Fetched index:', lines);
             return lines.map(line => {
                 const [code, name] = line.split(',').map(item => item.replace(/"/g, '').trim());
                 return { code: code.toLowerCase(), name };
@@ -247,153 +250,145 @@
         }
     }
 
-function adjustTooltipPosition(tooltip, cell) {
-    const rect = cell.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const centerX = viewportWidth / 2;
-    const centerY = viewportHeight / 2;
+    function adjustTooltipPosition(tooltip, cell) {
+        const rect = cell.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const centerX = viewportWidth / 2;
+        const centerY = viewportHeight / 2;
 
-    // Determine which sides of the cell are closest to the center of the screen
-    const isLeftCloser = rect.left + rect.width / 2 > centerX;
-    const isTopCloser = rect.top + rect.height / 2 > centerY;
+        const isLeftCloser = rect.left + rect.width / 2 > centerX;
+        const isTopCloser = rect.top + rect.height / 2 > centerY;
 
-    // Reset any previous positioning
-    tooltip.style.left = '';
-    tooltip.style.right = '';
-    tooltip.style.top = '';
-    tooltip.style.bottom = '';
+        tooltip.style.left = '';
+        tooltip.style.right = '';
+        tooltip.style.top = '';
+        tooltip.style.bottom = '';
 
-    // Calculate overlap (e.g., 12.5% of cell size for overlap)
-    const overlapSize = Math.min(rect.width, rect.height) * 0.015; // 12.5% overlap
+        const overlapSize = Math.min(rect.width, rect.height) * 0.015;
 
-    // Horizontal positioning
-    if (isLeftCloser) {
-        tooltip.style.right = `-${overlapSize}px`; // Negative for inward overlap
-        tooltip.style.left = ''; // Clear left positioning
-        tooltip.classList.add('tooltip-left');
-        tooltip.classList.remove('tooltip-right');
-    } else {
-        tooltip.style.left = `-${overlapSize}px`; // Negative for inward overlap
-        tooltip.style.right = ''; // Clear right positioning
-        tooltip.classList.add('tooltip-right');
-        tooltip.classList.remove('tooltip-left');
+        if (isLeftCloser) {
+            tooltip.style.right = `-${overlapSize}px`;
+            tooltip.style.left = '';
+            tooltip.classList.add('tooltip-left');
+            tooltip.classList.remove('tooltip-right');
+        } else {
+            tooltip.style.left = `-${overlapSize}px`;
+            tooltip.style.right = '';
+            tooltip.classList.add('tooltip-right');
+            tooltip.classList.remove('tooltip-left');
+        }
+
+        if (isTopCloser) {
+            tooltip.style.bottom = `-${overlapSize}px`;
+            tooltip.style.top = '';
+            tooltip.classList.add('tooltip-top');
+            tooltip.classList.remove('tooltip-bottom');
+        } else {
+            tooltip.style.top = `-${overlapSize}px`;
+            tooltip.style.bottom = '';
+            tooltip.classList.add('tooltip-bottom');
+            tooltip.classList.remove('tooltip-top');
+        }
+
+        if (tooltip.classList.contains('tooltip-left') && tooltip.classList.contains('tooltip-top')) {
+            tooltip.classList.add('tooltip-top-left');
+            tooltip.classList.remove('tooltip-bottom-left', 'tooltip-top-right', 'tooltip-bottom-right');
+        } else if (tooltip.classList.contains('tooltip-left') && tooltip.classList.contains('tooltip-bottom')) {
+            tooltip.classList.add('tooltip-bottom-left');
+            tooltip.classList.remove('tooltip-top-left', 'tooltip-top-right', 'tooltip-bottom-right');
+        } else if (tooltip.classList.contains('tooltip-right') && tooltip.classList.contains('tooltip-top')) {
+            tooltip.classList.add('tooltip-top-right');
+            tooltip.classList.remove('tooltip-top-left', 'tooltip-bottom-left', 'tooltip-bottom-right');
+        } else if (tooltip.classList.contains('tooltip-right') && tooltip.classList.contains('tooltip-bottom')) {
+            tooltip.classList.add('tooltip-bottom-right');
+            tooltip.classList.remove('tooltip-top-left', 'tooltip-bottom-left', 'tooltip-top-right');
+        }
     }
-
-    // Vertical positioning
-    if (isTopCloser) {
-        tooltip.style.bottom = `-${overlapSize}px`; // Negative for inward overlap
-        tooltip.style.top = ''; // Clear top positioning
-        tooltip.classList.add('tooltip-top');
-        tooltip.classList.remove('tooltip-bottom');
-    } else {
-        tooltip.style.top = `-${overlapSize}px`; // Negative for inward overlap
-        tooltip.style.bottom = ''; // Clear bottom positioning
-        tooltip.classList.add('tooltip-bottom');
-        tooltip.classList.remove('tooltip-top');
-    }
-
-    // Adjust for correct corner touch
-    if (tooltip.classList.contains('tooltip-left') && tooltip.classList.contains('tooltip-top')) {
-        tooltip.classList.add('tooltip-top-left');
-        tooltip.classList.remove('tooltip-bottom-left', 'tooltip-top-right', 'tooltip-bottom-right');
-    } else if (tooltip.classList.contains('tooltip-left') && tooltip.classList.contains('tooltip-bottom')) {
-        tooltip.classList.add('tooltip-bottom-left');
-        tooltip.classList.remove('tooltip-top-left', 'tooltip-top-right', 'tooltip-bottom-right');
-    } else if (tooltip.classList.contains('tooltip-right') && tooltip.classList.contains('tooltip-top')) {
-        tooltip.classList.add('tooltip-top-right');
-        tooltip.classList.remove('tooltip-top-left', 'tooltip-bottom-left', 'tooltip-bottom-right');
-    } else if (tooltip.classList.contains('tooltip-right') && tooltip.classList.contains('tooltip-bottom')) {
-        tooltip.classList.add('tooltip-bottom-right');
-        tooltip.classList.remove('tooltip-top-left', 'tooltip-bottom-left', 'tooltip-top-right');
-    }
-}
 
     let activeTooltip = null;
     let contentLoaded = false;
     let imagesLoaded = false;
 
-function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatmapId) {
-    const heatmap = document.getElementById(heatmapId);
+    function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatmapId) {
+        const heatmap = document.getElementById(heatmapId);
 
-    for (let row = 0; row < 6; row++) {
-        for (let col = 0; col < 68; col++) {
-            const originalCol = (heatmapId === 'heatmap1' ? col : (heatmapId === 'heatmap2' ? col + 68 : col + 136));
-            const prefix = `${String(originalCol).padStart(3, '0')}-${String(row).padStart(4, '0')}`;
-            const count = counts.get(prefix) || 0;
-            let cellColor = getCellColor(count);
+        for (let row = 0; row < 6; row++) {
+            for (let col = 0; col < 68; col++) {
+                const originalCol = (heatmapId === 'heatmap1' ? col : (heatmapId === 'heatmap2' ? col + 68 : col + 136));
+                const prefix = `${String(originalCol).padStart(3, '0')}-${String(row).padStart(4, '0')}`;
+                const count = counts.get(prefix) || 0;
+                let cellColor = getCellColor(count);
 
-            const cell = document.createElement('div');
-            cell.className = `heatmap_cell ${cellColor}`;
+                const cell = document.createElement('div');
+                cell.className = `heatmap_cell ${cellColor}`;
 
-            // Add flag as background image for cells in the first row
-            if (row === 0 && countryIndex[originalCol]) {
-                const countryCode = countryIndex[originalCol].code;
-                cell.style.backgroundImage = `url('_theme-explorer/flag/${countryCode}.png')`;
-                cell.style.backgroundSize = 'contain';
-                cell.style.backgroundRepeat = 'no-repeat';
-                cell.style.backgroundPosition = 'center';
-            }
-
-            const tooltip = document.createElement('div');
-            tooltip.className = 'tooltip';
-            const country = countryIndex[originalCol];
-            const countryCode = country ? country.code : null;
-            const countryName = country ? `(${countryCode.toUpperCase()}) ${country.name}` : `Country no.: ${originalCol + 1}`;
-            const divisionLevel = `Level ${row}`;
-            const uidFormat = `${prefix}-00000-000000-0000000-00000000`;
-
-            if (existingUIDs.includes(uidFormat)) {
-                tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><a href="${uidFormat}" target="_self" style="color: white;">View records</a>`;
-            } else {
-                tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><span style="color: grey;">View records</span>`;
-            }
-
-            tooltip.style.position = 'absolute';
-            tooltip.style.visibility = 'hidden';
-            tooltip.style.opacity = 0;
-            tooltip.style.transition = 'opacity 0.2s ease-in-out'; // Removed the 'visibility' transition
-
-            // Show and adjust tooltip on hover
-            cell.addEventListener('mouseenter', () => {
-                if (activeTooltip && activeTooltip !== tooltip) {
-                    hideTooltip(activeTooltip);
+                if (row === 0 && countryIndex[originalCol]) {
+                    const countryCode = countryIndex[originalCol].code;
+                    cell.style.backgroundImage = `url('_theme-explorer/flag/${countryCode}.png')`;
+                    cell.style.backgroundSize = 'contain';
+                    cell.style.backgroundRepeat = 'no-repeat';
+                    cell.style.backgroundPosition = 'center';
                 }
-                showTooltip(tooltip, cell);
-                activeTooltip = tooltip;
-            });
 
-            // Manage tooltip visibility with delay
-            let hideTimeout = null;
-            cell.addEventListener('mouseleave', () => {
-                hideTimeout = setTimeout(() => {
-                    hideTooltip(tooltip);
-                    if (activeTooltip === tooltip) {
-                        activeTooltip = null;
-                    }
-                }, 8000); // Reinstated 10.5s delay before hiding
-            });
+                const tooltip = document.createElement('div');
+                tooltip.className = 'tooltip';
+                const country = countryIndex[originalCol];
+                const countryCode = country ? country.code : null;
+                const countryName = country ? `(${countryCode.toUpperCase()}) ${country.name}` : `Country no.: ${originalCol + 1}`;
+                const divisionLevel = `Level ${row}`;
+                const uidFormat = `${prefix}-00000-000000-0000000-00000000`;
 
-            tooltip.addEventListener('mouseenter', () => {
-                if (hideTimeout) {
-                    clearTimeout(hideTimeout);
+                if (existingUIDs.includes(uidFormat)) {
+                    tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><a href="${uidFormat}" target="_self" style="color: white;">View records</a>`;
+                } else {
+                    tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><span style="color: grey;">View records</span>`;
                 }
-            });
 
-            tooltip.addEventListener('mouseleave', () => {
-                hideTimeout = setTimeout(() => {
-                    hideTooltip(tooltip);
-                    if (activeTooltip === tooltip) {
-                        activeTooltip = null;
+                tooltip.style.position = 'absolute';
+                tooltip.style.visibility = 'hidden';
+                tooltip.style.opacity = 0;
+                tooltip.style.transition = 'opacity 0.2s ease-in-out';
+
+                cell.addEventListener('mouseenter', () => {
+                    if (activeTooltip && activeTooltip !== tooltip) {
+                        hideTooltip(activeTooltip);
                     }
-                }, 8500); // 3500ms delay if mouse leaves tooltip
-            })
+                    showTooltip(tooltip, cell);
+                    activeTooltip = tooltip;
+                });
 
-            cell.appendChild(tooltip);
-            heatmap.appendChild(cell);
+                let hideTimeout = null;
+                cell.addEventListener('mouseleave', () => {
+                    hideTimeout = setTimeout(() => {
+                        hideTooltip(tooltip);
+                        if (activeTooltip === tooltip) {
+                            activeTooltip = null;
+                        }
+                    }, 8000);
+                });
+
+                tooltip.addEventListener('mouseenter', () => {
+                    if (hideTimeout) {
+                        clearTimeout(hideTimeout);
+                    }
+                });
+
+                tooltip.addEventListener('mouseleave', () => {
+                    hideTimeout = setTimeout(() => {
+                        hideTooltip(tooltip);
+                        if (activeTooltip === tooltip) {
+                            activeTooltip = null;
+                        }
+                    }, 8500);
+                });
+
+                cell.appendChild(tooltip);
+                heatmap.appendChild(cell);
+            }
         }
     }
-}
+
     function showTooltip(tooltip, cell) {
         tooltip.style.visibility = 'visible';
         tooltip.style.opacity = 1;
@@ -434,12 +429,13 @@ function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatma
     }
 
     function checkIfAllLoaded() {
+        console.log(`Content loaded: ${contentLoaded}, Images loaded: ${imagesLoaded}`);
         if (contentLoaded && imagesLoaded) {
             document.querySelector('.loader-overlay').classList.add('hidden');
+            console.log('Loader hidden');
         }
     }
 
-    // Image loading check
     document.addEventListener('DOMContentLoaded', () => {
         const images = document.querySelectorAll('img');
         let loadedImages = 0;
@@ -461,11 +457,17 @@ function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatma
                         checkIfAllLoaded();
                     }
                 });
+                img.addEventListener('error', () => {
+                    loadedImages++;
+                    if (loadedImages === images.length) {
+                        imagesLoaded = true;
+                        checkIfAllLoaded();
+                    }
+                });
             }
         });
     });
 
-    // Start the initialization process
     init();
     </script>
 </body>

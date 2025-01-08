@@ -1,6 +1,10 @@
 {
   "countries": [
     {
+      "name": "de",
+      "filename": "de.json"
+    },
+    {
       "name": "uk",
       "filename": "uk.json"
     },

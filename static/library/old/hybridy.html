@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>WWFM Library</title>
+    <link href="_theme-explorer/favicons/apple-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
+    <link href="_theme-explorer/favicons/apple-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
+    <link href="_theme-explorer/favicons/apple-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
+    <link href="_theme-explorer/favicons/apple-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
+    <link href="_theme-explorer/favicons/apple-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
+    <link href="_theme-explorer/favicons/apple-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
+    <link href="_theme-explorer/favicons/apple-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
+    <link href="_theme-explorer/favicons/apple-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
+    <link href="_theme-explorer/favicons/apple-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
+    <link href="_theme-explorer/favicons/android-icon-192x192.png" rel="icon" sizes="192x192" type="image/png">
+    <link href="_theme-explorer/favicons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
+    <link href="_theme-explorer/favicons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
+    <link href="_theme-explorer/favicons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
+    <link rel="manifest" href="manifest.json">
+    <meta content="_theme-explorer/favicons/ms-icon-144x144.png" name="msapplication-TileImage">
+    <link rel="stylesheet" href="https://library.wwfm-dsap.com/style.css">
+</head>
+<body>
+    <div class="key">
+        <p><span style="border:1px solid white; color: yellow;">■</span> Licensed</p>
+        <p><span style="border:1px solid white; color: black;">■</span> Negotiating</p>
+    </div>
+    <div class="container">
+        <div class="heatmap" id="heatmap1"></div>
+        <div class="heatmap" id="heatmap2"></div>
+        <div class="heatmap" id="heatmap3"></div>
+    </div>
+    <div class="loader-overlay">
+        <div class="globe">
+            <div class="sphere">
+                <div class="wireframe"></div>
+            </div>
+        </div>
+        <div class="loading-text">Loading ...</div>
+    </div>
+<script>
+async function fetchData() {
+    try {
+        const response = await fetch('data.json');
+        const data = await response.json();
+        console.log('Fetched data:', data);
+        return data.countries;
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        return null;
+    }
+}
+
+async function fetchCountryData(filename) {
+    try {
+        const response = await fetch(filename);
+        const data = await response.json();
+        console.log(`Fetched data from ${filename}:`, data);
+        return data;
+    } catch (error) {
+        console.error(`Error fetching data from ${filename}:`, error);
+        return null;
+    }
+}
+
+async function fetchIndex() {
+    try {
+        const response = await fetch('index.csv');
+        const text = await response.text();
+        const lines = text.split('\n').filter(Boolean); // Remove empty lines
+        console.log('Fetched index:', lines);
+        return lines.map(line => {
+            const [code, name] = line.split(',').map(item => item.replace(/"/g, '').trim());
+            return { code: code.toLowerCase(), name };
+        });
+    } catch (error) {
+        console.error('Error fetching index.csv:', error);
+        return [];
+    }
+}
+
+function extractUIDs(data) {
+    const uids = [];
+
+    function recurse(obj) {
+        if (obj.uid) {
+            uids.push(obj.uid);
+        }
+        for (const key in obj) {
+            if (typeof obj[key] === 'object') {
+                recurse(obj[key]);
+            }
+        }
+    }
+
+    recurse(data);
+    return uids;
+}
+
+function countUIDs(uids) {
+    const counts = new Map();
+
+    for (const uid of uids) {
+        const parts = uid.split('-');
+
+        for (let i = 1; i <= parts.length; i++) {
+            const prefix = parts.slice(0, i).join('-');
+            counts.set(prefix, (counts.get(prefix) || 0) + 1);
+        }
+    }
+
+    return counts;
+}
+
+function getCellColor(count) {
+    if (count >= 10) {
+        return 'light-green';
+    } else if (count > 0) {
+        return 'dark-green';
+    } else {
+        return 'dark-red';
+    }
+}
+
+function adjustTooltipPosition(tooltip, cell) {
+    const rect = cell.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const centerX = viewportWidth / 2;
+    const centerY = viewportHeight / 2;
+
+    const isLeftCloser = rect.left + rect.width / 2 > centerX;
+    const isTopCloser = rect.top + rect.height / 2 > centerY;
+
+    tooltip.style.left = '';
+    tooltip.style.right = '';
+    tooltip.style.top = '';
+    tooltip.style.bottom = '';
+
+    const overlapSize = Math.min(rect.width, rect.height) * 0.015;
+
+    if (isLeftCloser) {
+        tooltip.style.right = `-${overlapSize}px`;
+        tooltip.style.left = '';
+        tooltip.classList.add('tooltip-left');
+        tooltip.classList.remove('tooltip-right');
+    } else {
+        tooltip.style.left = `-${overlapSize}px`;
+        tooltip.style.right = '';
+        tooltip.classList.add('tooltip-right');
+        tooltip.classList.remove('tooltip-left');
+    }
+
+    if (isTopCloser) {
+        tooltip.style.bottom = `-${overlapSize}px`;
+        tooltip.style.top = '';
+        tooltip.classList.add('tooltip-top');
+        tooltip.classList.remove('tooltip-bottom');
+    } else {
+        tooltip.style.top = `-${overlapSize}px`;
+        tooltip.style.bottom = '';
+        tooltip.classList.add('tooltip-bottom');
+        tooltip.classList.remove('tooltip-top');
+    }
+
+    if (tooltip.classList.contains('tooltip-left') && tooltip.classList.contains('tooltip-top')) {
+        tooltip.classList.add('tooltip-top-left');
+        tooltip.classList.remove('tooltip-bottom-left', 'tooltip-top-right', 'tooltip-bottom-right');
+    } else if (tooltip.classList.contains('tooltip-left') && tooltip.classList.contains('tooltip-bottom')) {
+        tooltip.classList.add('tooltip-bottom-left');
+        tooltip.classList.remove('tooltip-top-left', 'tooltip-top-right', 'tooltip-bottom-right');
+    } else if (tooltip.classList.contains('tooltip-right') && tooltip.classList.contains('tooltip-top')) {
+        tooltip.classList.add('tooltip-top-right');
+        tooltip.classList.remove('tooltip-top-left', 'tooltip-bottom-left', 'tooltip-bottom-right');
+    } else if (tooltip.classList.contains('tooltip-right') && tooltip.classList.contains('tooltip-bottom')) {
+        tooltip.classList.add('tooltip-bottom-right');
+        tooltip.classList.remove('tooltip-top-left', 'tooltip-bottom-left', 'tooltip-top-right');
+    }
+}
+
+let activeTooltip = null;
+let contentLoaded = false;
+let imagesLoaded = false;
+
+function createHeatmap(counts, countryIndex, divisionNames, existingUIDs, heatmapId) {
+    const heatmap = document.getElementById(heatmapId);
+
+    for (let row = 0; row < 6; row++) {
+        for (let col = 0; col < 68; col++) {
+            const originalCol = (heatmapId === 'heatmap1' ? col : (heatmapId === 'heatmap2' ? col + 68 : col + 136));
+            const prefix = `${String(originalCol).padStart(3, '0')}-${String(row).padStart(4, '0')}`;
+            const count = counts.get(prefix) || 0;
+            let cellColor = getCellColor(count);
+
+            const cell = document.createElement('div');
+            cell.className = `heatmap_cell ${cellColor}`;
+
+            if (row === 0 && countryIndex[originalCol]) {
+                const countryCode = countryIndex[originalCol].code;
+                cell.style.backgroundImage = `url('_theme-explorer/flag/${countryCode}.png')`;
+                cell.style.backgroundSize = 'contain';
+                cell.style.backgroundRepeat = 'no-repeat';
+                cell.style.backgroundPosition = 'center';
+            }
+
+            const tooltip = document.createElement('div');
+            tooltip.className = 'tooltip';
+            const country = countryIndex[originalCol];
+            const countryCode = country ? country.code : null;
+            const countryName = country ? `(${countryCode.toUpperCase()}) ${country.name}` : `Country no.: ${originalCol + 1}`;
+            const divisionLevel = `Level ${row}`;
+            const uidFormat = `${prefix}-00000-000000-0000000-00000000`;
+
+            if (existingUIDs.includes(uidFormat)) {
+                tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><a href="${uidFormat}" target="_self" style="color: white;">View records</a>`;
+            } else {
+                tooltip.innerHTML = `${countryName}<br>${divisionLevel}<br><span style="color: grey;">View records</span>`;
+            }
+
+            tooltip.style.position = 'absolute';
+            tooltip.style.visibility = 'hidden';
+            tooltip.style.opacity = 0;
+            tooltip.style.transition = 'opacity 0.2s ease-in-out';
+
+            cell.addEventListener('mouseenter', () => {
+                if (activeTooltip && activeTooltip !== tooltip) {
+                    hideTooltip(activeTooltip);
+                }
+                showTooltip(tooltip, cell);
+                activeTooltip = tooltip;
+            });
+
+            let hideTimeout = null;
+            cell.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(() => {
+                    hideTooltip(tooltip);
+                    if (activeTooltip === tooltip) {
+                        activeTooltip = null;
+                    }
+                }, 8000);
+            });
+
+            tooltip.addEventListener('mouseenter', () => {
+                if (hideTimeout) {
+                    clearTimeout(hideTimeout);
+                }
+            });
+
+            tooltip.addEventListener('mouseleave', () => {
+                hideTimeout = setTimeout(() => {
+                    hideTooltip(tooltip);
+                    if (activeTooltip === tooltip) {
+                        activeTooltip = null;
+                    }
+                }, 8500);
+            });
+
+            cell.appendChild(tooltip);
+            heatmap.appendChild(cell);
+        }
+    }
+}
+
+function showTooltip(tooltip, cell) {
+    tooltip.style.visibility = 'visible';
+    tooltip.style.opacity = 1;
+    adjustTooltipPosition(tooltip, cell);
+}
+
+function hideTooltip(tooltip) {
+    tooltip.style.visibility = 'hidden';
+    tooltip.style.opacity = 0;
+}
+
+async function init() {
+    try {
+        const [countryData, countryIndex] = await Promise.all([fetchData(), fetchIndex()]);
+        console.log('Data and index fetched:', countryData, countryIndex);
+
+        if (!countryData || !countryIndex.length) {
+            console.error('Failed to fetch data or index.');
+            return;
+        }
+
+        let allUIDs = [];
+        let divisionNames = ["Level 0", "Level 1", "Level 2", "Level 3", "Level 4", "Level 5"];
+
+        for (const country of countryData) {
+            const data = await fetchCountryData(country.filename);
+            if (data) {
+                const uids = extractUIDs(data);
+                allUIDs = allUIDs.concat(uids);
+            } else {
+                console.warn(`Failed to load data for ${country.filename}`);
+            }
+        }
+
+        const counts = countUIDs(allUIDs);
+        createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap1');
+        createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap2');
+        createHeatmap(counts, countryIndex, divisionNames, allUIDs, 'heatmap3');
+
+        contentLoaded = true; // Set this flag when content is loaded
+        console.log('Content loaded');
+        checkIfAllLoaded();
+    } catch (error) {
+        console.error('Initialization error:', error);
+    }
+}
+
+function checkIfAllLoaded() {
+    console.log(`checkIfAllLoaded called - Content loaded: ${contentLoaded}, Images loaded: ${imagesLoaded}`);
+    if (contentLoaded && imagesLoaded) {
+        document.querySelector('.loader-overlay').classList.add('hidden');
+        console.log('Loader hidden');
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const images = document.querySelectorAll('img');
+    let loadedImages = 0;
+
+    if (images.length === 0) {
+        imagesLoaded = true;
+        checkIfAllLoaded();
+        return;
+    }
+
+    images.forEach(img => {
+        if (img.complete) {
+            loadedImages++;
+        } else {
+            img.addEventListener('load', () => {
+                loadedImages++;
+                if (loadedImages === images.length) {
+                    imagesLoaded = true;
+                    checkIfAllLoaded();
+                }
+            });
+            img.addEventListener('error', () => {
+                loadedImages++;
+                if (loadedImages === images.length) {
+                    imagesLoaded = true;
+                    checkIfAllLoaded();
+                }
+            });
+        }
+    });
+});
+
+init();
+</script>
+</body>
+</html>
