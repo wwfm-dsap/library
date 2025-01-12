@@ -1,2 +1,4 @@
 [build]
+  base = "static/library"
+  publish = "static/library"
   functions = "static/library/netlify/functions"
