@@ -2,7 +2,6 @@
   "name": "WWFM-DSAP Monorepo",
   "version": "0.0.1",
   "description": "Free-to-Access Internet - Network Protocol",
-  "main": "static/library/netlify/functions/referral.js", // or whatever your main file is, not crucial for Netlify functions
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
