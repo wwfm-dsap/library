@@ -1,0 +1,2 @@
+[build]
+  functions = "static/library/netlify/functions"
