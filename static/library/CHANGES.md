@@ -1,2 +1,2 @@
-can't get status.html (new version with loading.html integrated). 
-hybrid worked. So I made it states.html , but 
+2-chatgpt-01.sh - sort of. maybe 3.sh is the issue
+2-gemini-01.sh

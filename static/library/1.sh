@@ -9,6 +9,7 @@ TIMESTAMP=$(date +%s)
 TEMP_XLSX="temp_$TIMESTAMP.xlsx"
 DOWNLOAD_LOG="download_$TIMESTAMP.log"
 
+rm -r *.xlsx
 # Download the XLSX file
 echo "Attempting to download from $URL"
 curl -f --location -v "$URL" -o "$TEMP_XLSX" 2>&1 | tee "$DOWNLOAD_LOG"
