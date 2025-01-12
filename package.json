@@ -6,12 +6,10 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "node-fetch": "^3.3.0" // Version might vary based on your needs
+    "node-fetch": "^3.3.0"
   },
-  "devDependencies": {
-    // Any development dependencies you might have
-  },
-  "keywords": [free internet],
+  "devDependencies": {},
+  "keywords": ["free internet"],
   "author": "Sion Buckler",
   "license": "OGL3.0"
 }
